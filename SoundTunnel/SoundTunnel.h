@@ -33,7 +33,10 @@ extern CSoundTunnelApp theApp;
 
 // Saját
 
-#include "Audio\AudioApi.h"
+//#include "Audio\AudioApi.h"
+
+#include "Audio\AudioDuplicator.h"
+#include "Audio\MicrophoneOut.h"
 
 
 
