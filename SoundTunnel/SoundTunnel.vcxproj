@@ -76,15 +76,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -184,6 +188,8 @@
   <ItemGroup>
     <ClInclude Include="Audio\AudioApi.h" />
     <ClInclude Include="Audio\AudioDuplicator.h" />
+    <ClInclude Include="Audio\AudioFileHandler.h" />
+    <ClInclude Include="Audio\AudioStreamer.h" />
     <ClInclude Include="Audio\MicrophoneOut.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SoundTunnel.h" />
@@ -192,6 +198,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Audio\AudioDuplicator.cpp" />
+    <ClCompile Include="Audio\AudioFileHandler.cpp" />
     <ClCompile Include="SoundTunnel.cpp" />
     <ClCompile Include="SoundTunnelDlg.cpp" />
     <ClCompile Include="stdafx.cpp">

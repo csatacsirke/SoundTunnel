@@ -36,7 +36,9 @@ extern CSoundTunnelApp theApp;
 //#include "Audio\AudioApi.h"
 
 #include "Audio\AudioDuplicator.h"
-#include "Audio\MicrophoneOut.h"
+#include "Audio\AudioStreamer.h"
+#include "Audio\AudioFileHandler.h"
+//#include "Audio\MicrophoneOut.h"
 
 
 
