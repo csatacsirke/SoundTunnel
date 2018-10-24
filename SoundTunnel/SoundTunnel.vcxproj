@@ -189,19 +189,25 @@
     <ClInclude Include="Audio\AudioApi.h" />
     <ClInclude Include="Audio\AudioDuplicator.h" />
     <ClInclude Include="Audio\AudioFileHandler.h" />
+    <ClInclude Include="Audio\AudioGraph.h" />
+    <ClInclude Include="Audio\AudioSinkDevice.h" />
     <ClInclude Include="Audio\AudioStreamer.h" />
     <ClInclude Include="Audio\MicrophoneOut.h" />
+    <ClInclude Include="Audio\Test.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SoundTunnel.h" />
-    <ClInclude Include="SoundTunnelDlg.h" />
+    <ClInclude Include="Interface\SoundTunnel.h" />
+    <ClInclude Include="Interface\SoundTunnelDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Audio\AudioApi.cpp" />
     <ClCompile Include="Audio\AudioDuplicator.cpp" />
     <ClCompile Include="Audio\AudioFileHandler.cpp" />
-    <ClCompile Include="SoundTunnel.cpp" />
-    <ClCompile Include="SoundTunnelDlg.cpp" />
+    <ClCompile Include="Audio\AudioSinkDevice.cpp" />
+    <ClCompile Include="Audio\AudioStreamer.cpp" />
+    <ClCompile Include="Interface\SoundTunnel.cpp" />
+    <ClCompile Include="Interface\SoundTunnelDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -210,7 +216,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SoundTunnel.rc" />
+    <ResourceCompile Include="Interface\SoundTunnel.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\SoundTunnel.rc2" />

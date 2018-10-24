@@ -2,7 +2,7 @@
 
 
 #include "AudioApi.h"
-
+#include <thread>
 
 
 class AudioDuplicator {
@@ -19,39 +19,15 @@ public:
 	HRESULT SetSinkDevice(CComPtr<IMMDevice> device);
 
 	HRESULT Run();
+	HRESULT RunAsync();
 	void Stop();
 private:
-
-	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, CComPtr<IMMDevice>& device);
+	thread backgroundThread;
+private:
+	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const vector<CString>& preferredDevices, _Out_ CComPtr<IMMDevice>& device);
 	HRESULT Init();
 	HRESULT InitDefaultDevices();
 };
-
-
-
-static void DoEverythingLofasz() {
-	try {
-		shared_ptr<AudioDuplicator> recorder = make_shared<AudioDuplicator>();
-
-
-		std::thread myThread([&recorder] {
-			recorder->Run();
-
-		});
-
-		MessageBox(NULL, L"Press ok to stop", 0, MB_ICONASTERISK);
-		recorder->Stop();
-		myThread.join();
-
-
-	}
-	catch (AudioApiException) {
-		MessageBox(0, L"Recorder exception", 0, 0);
-	}
-
-
-
-}
 
 
 

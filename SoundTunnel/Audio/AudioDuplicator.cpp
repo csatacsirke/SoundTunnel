@@ -74,8 +74,8 @@ HRESULT AudioDuplicator::Run() {
 	hr = pSourceAudioClient->GetMixFormat(&pwfx);
 	EXIT_ON_ERROR(hr);
 
-
-	REFERENCE_TIME hnsRequestedDuration = REFTIMES_PER_SEC;
+	// HSN: HUNDRED NANO SECONDS
+	REFERENCE_TIME hnsRequestedDuration = BUFFER_DURATION_HNS;
 	hr = pSourceAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK, hnsRequestedDuration, 0, pwfx, NULL);
 	EXIT_ON_ERROR(hr);
 
@@ -123,12 +123,12 @@ HRESULT AudioDuplicator::Run() {
 
 	// Calculate the actual duration of the allocated buffer.
 	//REFERENCE_TIME hnsActualDuration = REFERENCE_TIME(double(REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
-	DWORD hnsActualDuration = DWORD(double(REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
+	DWORD hnsActualDuration = DWORD(double(__REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
 
 	// Each loop fills about half of the shared buffer.
 	while (!stop) {
 		// Sleep for half the buffer duration.
-		Sleep(hnsActualDuration / REFTIMES_PER_MILLISEC / 2);
+		Sleep(hnsActualDuration / __REFTIMES_PER_MILLISEC / 2);
 
 		UINT32 packetLength = 0;
 		hr = pCaptureClient->GetNextPacketSize(&packetLength);
@@ -202,15 +202,36 @@ HRESULT AudioDuplicator::Run() {
 	return S_OK;
 }
 
+HRESULT AudioDuplicator::RunAsync() {
+	backgroundThread = thread([this]{
+		bool retry = true;
+		while (retry) {
+			HRESULT hr = Run();
+			retry = FAILED(hr) && !stop;
+			if (retry) {
+				Sleep(1000);
+			}
+		}
+		
+	});
+	return S_OK;
+}
+
+
 void AudioDuplicator::Stop() {
 	stop = true;
 }
 
 
-HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, CComPtr<IMMDevice>& device) {
-	CString preferredSecondaryDeviceName = L"SAMSUNG";
+HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const vector<CString>& preferredDevices, CComPtr<IMMDevice>& resultDevice) {
+	//CString preferredSecondaryDeviceName = L"SAMSUNG";
 
 	HRESULT hr = S_OK;
+
+	if (preferredDevices.size() == 0) {
+		ASSERT(0);
+		return ERROR_NOT_FOUND;
+	}
 
 	CComPtr<IMMDevice> pDefaultDevice;
 	hr = pEnumerator->GetDefaultAudioEndpoint(
@@ -224,16 +245,16 @@ HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, 
 	EXIT_ON_ERROR(hr);
 
 
-
-	if (deafultDevicefriendlyName.Find(preferredSecondaryDeviceName) >= 0) {
-		// már alapból a kivanatos volt kivalasztva deafultnak, igy semmi ertelme
-		// ILLETVE meg lehet csinálni, hogy ilyenkor a füles legyen a secondary
-		//  VAGY GUI n lehessen kiválasztani
-		//hr = ERROR_ALREADY_EXISTS;
-		//return hr;
-		preferredSecondaryDeviceName = L"Speakers";
+	CString deviceNameToFind = preferredDevices.front();
+	if (deafultDevicefriendlyName.Find(deviceNameToFind) >= 0) {
+		// már alapból a kivanatos volt kivalasztva defaultnak, szóval másikat választunk
+		if (preferredDevices.size() > 1) {
+			deviceNameToFind = preferredDevices[1];
+		} else {
+			ASSERT(0);
+			return ERROR_NOT_FOUND;
+		}
 	}
-
 
 	CComPtr<IMMDeviceCollection> deviceCollection;
 	hr = pEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &deviceCollection);
@@ -246,17 +267,18 @@ HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, 
 
 
 	for (int i = 0; i < int(deviceCount); ++i) {
-		device.Release();
+		CComPtr<IMMDevice> device;
 		hr = deviceCollection->Item(i, &device);
 		EXIT_ON_ERROR(hr);
 
 
-		CString devicefriendlyName;
-		hr = GetFriendlyName(device, devicefriendlyName);
+		CString deviceFriendlyName;
+		hr = GetFriendlyName(device, deviceFriendlyName);
 		EXIT_ON_ERROR(hr);
 
 
-		if (devicefriendlyName.Find(preferredSecondaryDeviceName) >= 0) {
+		if (deviceFriendlyName.Find(deviceNameToFind) >= 0) {
+			resultDevice = device;
 			ASSERT(hr == S_OK);
 			return hr;
 		}
@@ -291,7 +313,7 @@ HRESULT AudioDuplicator::InitDefaultDevices() {
 	// init renderer instance
 
 	CComPtr<IMMDevice> secondaryDevice;
-	hr = SelectDevice(pEnumerator, secondaryDevice);
+	hr = SelectDevice(pEnumerator, {L"SAMSUNG", L"Speakers"}, secondaryDevice);
 	EXIT_ON_ERROR(hr);
 
 	this->sinkDevice = secondaryDevice;
