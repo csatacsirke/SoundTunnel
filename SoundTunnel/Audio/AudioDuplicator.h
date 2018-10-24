@@ -2,6 +2,9 @@
 
 
 #include "AudioApi.h"
+
+#include <Utils/Semaphore.h>
+
 #include <thread>
 
 
@@ -11,6 +14,7 @@ class AudioDuplicator {
 
 
 	volatile bool stop = false;
+	Semaphore uninitSemaphore;
 public:
 	AudioDuplicator();
 
@@ -21,6 +25,7 @@ public:
 	HRESULT Run();
 	HRESULT RunAsync();
 	void Stop();
+	void WaitForDestroy();
 private:
 	thread backgroundThread;
 private:

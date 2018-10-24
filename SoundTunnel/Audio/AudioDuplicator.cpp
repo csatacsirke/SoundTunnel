@@ -204,6 +204,11 @@ HRESULT AudioDuplicator::Run() {
 
 HRESULT AudioDuplicator::RunAsync() {
 	backgroundThread = thread([this]{
+		if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL)) {
+			ASSERT(0);
+		}
+
+
 		bool retry = true;
 		while (retry) {
 			HRESULT hr = Run();
@@ -212,14 +217,21 @@ HRESULT AudioDuplicator::RunAsync() {
 				Sleep(1000);
 			}
 		}
-		
+
+		uninitSemaphore.notify();
 	});
+
 	return S_OK;
 }
 
 
 void AudioDuplicator::Stop() {
 	stop = true;
+}
+
+
+void AudioDuplicator::WaitForDestroy() {
+	uninitSemaphore.wait();
 }
 
 

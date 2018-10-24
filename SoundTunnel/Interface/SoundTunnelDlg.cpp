@@ -111,5 +111,6 @@ void CSoundTunnelDlg::Start() {
 
 void CSoundTunnelDlg::Stop() {
 	audioDuplicator->Stop();
+	audioDuplicator->WaitForDestroy();
 }
 
