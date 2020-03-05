@@ -241,45 +241,6 @@ void AudioDuplicator::WaitForDestroy() {
 }
 
 
-HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const CString& deviceNameSubstring, CComPtr<IMMDevice>& resultDevice) {
-	//CString preferredSecondaryDeviceName = L"SAMSUNG";
-
-	HRESULT hr = S_OK;
-
-
-	CComPtr<IMMDeviceCollection> deviceCollection;
-	hr = pEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &deviceCollection);
-	EXIT_ON_ERROR(hr);
-
-
-	UINT deviceCount;
-	hr = deviceCollection->GetCount(&deviceCount);
-	EXIT_ON_ERROR(hr);
-
-
-	for (int i = 0; i < int(deviceCount); ++i) {
-		CComPtr<IMMDevice> device;
-		hr = deviceCollection->Item(i, &device);
-		EXIT_ON_ERROR(hr);
-
-
-		CString deviceFriendlyName;
-		hr = GetFriendlyName(device, deviceFriendlyName);
-		EXIT_ON_ERROR(hr);
-
-
-		if (deviceFriendlyName.Find(deviceNameSubstring) >= 0) {
-			resultDevice = device;
-			ASSERT(hr == S_OK);
-			return hr;
-		}
-
-	}
-	hr = -1;
-	return hr;
-
-}
-
 HRESULT AudioDuplicator::InitDefaultDevices() {
 
 	HRESULT hr;
@@ -321,26 +282,6 @@ HRESULT AudioDuplicator::InitDefaultDevices() {
 	}
 
 
-
-	//CString sourceDeviceName;
-	//hr = GetFriendlyName(pDefaultDevice, sourceDeviceName);
-	//EXIT_ON_ERROR(hr);
-
-	//auto removeCondition = [&] (const CString& name) {
-	//	return (sourceDeviceName.Find(name) >= 0);
-	//};
-	//std::set<CString> defaultDeviceNames = { L"SAMSUNG", L"Speakers" };
-	//
-	////defaultDeviceNames.erase().
-	//auto wtf = std::remove_if(defaultDeviceNames.begin(), defaultDeviceNames.end(), removeCondition);
-	//if (defaultDeviceNames.size() != 1) {
-	//	return -1;
-	//}
-	//// init renderer instance
-
-	//CComPtr<IMMDevice> secondaryDevice;
-	//hr = SelectDevice(pEnumerator, defaultDeviceNames.front(), secondaryDevice);
-	//EXIT_ON_ERROR(hr);
 
 
 	return -1;

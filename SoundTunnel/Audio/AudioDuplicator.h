@@ -32,7 +32,6 @@ public:
 private:
 	std::thread backgroundThread;
 private:
-	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const CString& deviceNameSubstring, _Out_ CComPtr<IMMDevice>& device);
 	HRESULT Init();
 };
 
