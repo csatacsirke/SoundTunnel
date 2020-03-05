@@ -194,11 +194,7 @@
     <ClInclude Include="Audio\AudioApiUtils.h" />
     <ClInclude Include="Audio\AudioDuplicator.h" />
     <ClInclude Include="Audio\AudioFileHandler.h" />
-    <ClInclude Include="Audio\AudioGraph.h" />
     <ClInclude Include="Audio\AudioSinkDevice.h" />
-    <ClInclude Include="Audio\AudioStreamer.h" />
-    <ClInclude Include="Audio\MicrophoneOut.h" />
-    <ClInclude Include="Audio\Test.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Interface\SoundTunnelApp.h" />
     <ClInclude Include="Interface\SoundTunnelDlg.h" />
@@ -211,7 +207,6 @@
     <ClCompile Include="Audio\AudioDuplicator.cpp" />
     <ClCompile Include="Audio\AudioFileHandler.cpp" />
     <ClCompile Include="Audio\AudioSinkDevice.cpp" />
-    <ClCompile Include="Audio\AudioStreamer.cpp" />
     <ClCompile Include="Interface\SoundTunnelApp.cpp" />
     <ClCompile Include="Interface\SoundTunnelDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
