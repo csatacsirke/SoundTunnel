@@ -14,9 +14,9 @@ class AudioDuplicator {
 
 
 	volatile bool stop = false;
-	Semaphore uninitSemaphore;
 public:
 	AudioDuplicator();
+	~AudioDuplicator();
 
 	
 	HRESULT SetSourceDevice(CComPtr<IMMDevice> device);

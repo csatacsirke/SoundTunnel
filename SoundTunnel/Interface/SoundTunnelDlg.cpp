@@ -3,7 +3,7 @@
 //
 
 #include "stdafx.h"
-#include "SoundTunnel.h"
+#include "SoundTunnelApp.h"
 #include "SoundTunnelDlg.h"
 #include "afxdialogex.h"
 
@@ -16,10 +16,11 @@
 
 
 
-CSoundTunnelDlg::CSoundTunnelDlg(CWnd* pParent /*=NULL*/)
+CSoundTunnelDlg::CSoundTunnelDlg(const std::shared_ptr<AudioDuplicator>& audioDuplicator, CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_SOUNDTUNNEL_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_audioDuplicator = audioDuplicator;
 }
 
 void CSoundTunnelDlg::DoDataExchange(CDataExchange* pDX)
@@ -46,7 +47,7 @@ BOOL CSoundTunnelDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
-	Start();
+	//Start();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -88,29 +89,29 @@ HCURSOR CSoundTunnelDlg::OnQueryDragIcon()
 }
 
 
-void CSoundTunnelDlg::Start() {
-
-	audioDuplicator->RunAsync();
-	//audioThread.
-
-	//std::thread myThread([&audioDuplicator] {
-	//	audioDuplicator->Run();
-	//
-	//});
-	//
-	//MessageBox(NULL, L"Press ok to stop", 0, MB_ICONASTERISK);
-	//std::async([this] {
-	//	audioDuplicator->Run();
-	//});
-	//audioThread = thread{ [this] {
-	//	audioDuplicator->Run();
-	//}};
-	//myThread.join();
-}
-
-
-void CSoundTunnelDlg::Stop() {
-	audioDuplicator->Stop();
-	audioDuplicator->WaitForDestroy();
-}
-
+//void CSoundTunnelDlg::Start() {
+//
+//	m_audioDuplicator->RunAsync();
+//	//audioThread.
+//
+//	//std::thread myThread([&audioDuplicator] {
+//	//	audioDuplicator->Run();
+//	//
+//	//});
+//	//
+//	//MessageBox(NULL, L"Press ok to stop", 0, MB_ICONASTERISK);
+//	//std::async([this] {
+//	//	audioDuplicator->Run();
+//	//});
+//	//audioThread = thread{ [this] {
+//	//	audioDuplicator->Run();
+//	//}};
+//	//myThread.join();
+//}
+//
+//
+//void CSoundTunnelDlg::Stop() {
+//	m_audioDuplicator->Stop();
+//	m_audioDuplicator->WaitForDestroy();
+//}
+//

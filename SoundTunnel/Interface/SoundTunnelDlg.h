@@ -16,7 +16,7 @@ class CSoundTunnelDlg : public CDialogEx
 {
 // Construction
 public:
-	CSoundTunnelDlg(CWnd* pParent = NULL);	// standard constructor
+	CSoundTunnelDlg(const std::shared_ptr<AudioDuplicator>& audioDuplicator, CWnd* pParent = NULL);	// standard constructor
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -38,10 +38,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-
-	shared_ptr<AudioDuplicator> audioDuplicator = make_shared<AudioDuplicator>();
+	std::shared_ptr<AudioDuplicator> m_audioDuplicator;
 	//thread audioThread;
 
-	void Start();
-	void Stop();
+	//void Start();
+	//void Stop();
 };

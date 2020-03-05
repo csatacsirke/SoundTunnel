@@ -33,3 +33,5 @@ packages/
 *.dll
 *.ipch
 *.VC.db
+
+.trash/

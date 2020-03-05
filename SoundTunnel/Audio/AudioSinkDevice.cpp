@@ -121,7 +121,7 @@ HRESULT AudioSinkDevice::AddSamples(BufferIterator & bufferIterator) {
 	Chunk chunk = bufferIterator.NextChunk(size);
 
 
-	numFramesAvailable = chunk.size / blockAlign;
+	numFramesAvailable = UINT32(chunk.size / blockAlign);
 
 	if (numFramesAvailable == 0) {
 		// illett volna leelenorizni hogy buffer.hasnext()

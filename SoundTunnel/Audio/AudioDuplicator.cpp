@@ -22,6 +22,10 @@ AudioDuplicator::AudioDuplicator() {
 
 }
 
+AudioDuplicator::~AudioDuplicator() {
+	Stop();
+}
+
 HRESULT AudioDuplicator::Init() {
 
 	HRESULT hr;
@@ -217,8 +221,6 @@ HRESULT AudioDuplicator::RunAsync() {
 				Sleep(1000);
 			}
 		}
-
-		uninitSemaphore.notify();
 	});
 
 	return S_OK;
@@ -231,7 +233,9 @@ void AudioDuplicator::Stop() {
 
 
 void AudioDuplicator::WaitForDestroy() {
-	uninitSemaphore.wait();
+	if (backgroundThread.joinable()) {
+		backgroundThread.join();
+	}
 }
 
 
