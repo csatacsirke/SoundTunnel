@@ -8,7 +8,7 @@
 
 namespace AudioApi {
 
-	HRESULT EnumerateDevices(std::vector<CComPtr<IMMDevice>>& devices);
+	HRESULT EnumerateDevices(std::vector<CComPtr<IMMDevice>>& devices, EDataFlow dataFlow);
 
 
 	HRESULT GetFriendlyName(CComPtr<IMMDevice> device, CString& friendlyName);

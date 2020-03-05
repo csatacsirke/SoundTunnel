@@ -3,6 +3,7 @@
 #include "AudioDuplicator.h"
 #include "AudioApi.h"
 
+#include <set>
 // TODO lehetne hozzá gui-t írni
 
 
@@ -37,8 +38,8 @@ HRESULT AudioDuplicator::Init() {
 
 	
 
-	hr = InitDefaultDevices();
-	EXIT_ON_ERROR(hr);
+	//hr = InitDefaultDevices();
+	//EXIT_ON_ERROR(hr);
 
 
 	return hr;
@@ -240,38 +241,11 @@ void AudioDuplicator::WaitForDestroy() {
 }
 
 
-HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const std::vector<CString>& preferredDevices, CComPtr<IMMDevice>& resultDevice) {
+HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const CString& deviceNameSubstring, CComPtr<IMMDevice>& resultDevice) {
 	//CString preferredSecondaryDeviceName = L"SAMSUNG";
 
 	HRESULT hr = S_OK;
 
-	if (preferredDevices.size() == 0) {
-		ASSERT(0);
-		return ERROR_NOT_FOUND;
-	}
-
-	CComPtr<IMMDevice> pDefaultDevice;
-	hr = pEnumerator->GetDefaultAudioEndpoint(
-		eRender, eConsole, &pDefaultDevice);
-	EXIT_ON_ERROR(hr);
-
-
-
-	CString deafultDevicefriendlyName;
-	hr = GetFriendlyName(pDefaultDevice, deafultDevicefriendlyName);
-	EXIT_ON_ERROR(hr);
-
-
-	CString deviceNameToFind = preferredDevices.front();
-	if (deafultDevicefriendlyName.Find(deviceNameToFind) >= 0) {
-		// már alapból a kivanatos volt kivalasztva defaultnak, szóval másikat választunk
-		if (preferredDevices.size() > 1) {
-			deviceNameToFind = preferredDevices[1];
-		} else {
-			ASSERT(0);
-			return ERROR_NOT_FOUND;
-		}
-	}
 
 	CComPtr<IMMDeviceCollection> deviceCollection;
 	hr = pEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &deviceCollection);
@@ -294,19 +268,20 @@ HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, 
 		EXIT_ON_ERROR(hr);
 
 
-		if (deviceFriendlyName.Find(deviceNameToFind) >= 0) {
+		if (deviceFriendlyName.Find(deviceNameSubstring) >= 0) {
 			resultDevice = device;
 			ASSERT(hr == S_OK);
 			return hr;
 		}
 
 	}
-	hr = ERROR_NOT_FOUND;
+	hr = -1;
 	return hr;
 
 }
 
 HRESULT AudioDuplicator::InitDefaultDevices() {
+
 	HRESULT hr;
 
 	CComPtr<IMMDeviceEnumerator> pEnumerator;
@@ -325,15 +300,48 @@ HRESULT AudioDuplicator::InitDefaultDevices() {
 		eRender, eConsole, &pDefaultDevice);
 	EXIT_ON_ERROR(hr);
 
+	CComHeapPtr<WCHAR> defaultDeviceId;
+	pDefaultDevice->GetId(&defaultDeviceId);
 	this->sourceDevice = pDefaultDevice;
 
-	// init renderer instance
-
-	CComPtr<IMMDevice> secondaryDevice;
-	hr = SelectDevice(pEnumerator, {L"SAMSUNG", L"Speakers"}, secondaryDevice);
+	std::vector<CComPtr<IMMDevice>> devices;
+	AudioApi::EnumerateDevices(devices, EDataFlow::eRender);
 	EXIT_ON_ERROR(hr);
 
-	this->sinkDevice = secondaryDevice;
+	for (auto& device : devices) {
+		CComHeapPtr<WCHAR> deviceId;
+		device->GetId(&deviceId);
+		EXIT_ON_ERROR(hr);
 
-	return hr;
+		if (StrCmpW((LPWSTR)deviceId, (LPWSTR)defaultDeviceId) != 0) {
+			this->sinkDevice = device;
+			return S_OK;
+		}
+		
+	}
+
+
+
+	//CString sourceDeviceName;
+	//hr = GetFriendlyName(pDefaultDevice, sourceDeviceName);
+	//EXIT_ON_ERROR(hr);
+
+	//auto removeCondition = [&] (const CString& name) {
+	//	return (sourceDeviceName.Find(name) >= 0);
+	//};
+	//std::set<CString> defaultDeviceNames = { L"SAMSUNG", L"Speakers" };
+	//
+	////defaultDeviceNames.erase().
+	//auto wtf = std::remove_if(defaultDeviceNames.begin(), defaultDeviceNames.end(), removeCondition);
+	//if (defaultDeviceNames.size() != 1) {
+	//	return -1;
+	//}
+	//// init renderer instance
+
+	//CComPtr<IMMDevice> secondaryDevice;
+	//hr = SelectDevice(pEnumerator, defaultDeviceNames.front(), secondaryDevice);
+	//EXIT_ON_ERROR(hr);
+
+
+	return -1;
 }

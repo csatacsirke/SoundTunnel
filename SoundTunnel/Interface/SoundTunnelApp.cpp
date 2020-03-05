@@ -94,6 +94,11 @@ BOOL CSoundTunnelApp::InitInstance()
 
 
 	std::shared_ptr<AudioDuplicator> audioDuplicator = std::make_shared<AudioDuplicator>();
+	if (FAILED(audioDuplicator->InitDefaultDevices())) {
+		MessageBox(NULL, L"Failed to init. #1", nullptr, 0);
+		return FALSE;
+	}
+
 	audioDuplicator->RunAsync();
 
 	CSoundTunnelDlg dlg(audioDuplicator);

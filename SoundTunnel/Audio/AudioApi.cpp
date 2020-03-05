@@ -3,7 +3,7 @@
 #include "AudioApi.h"
 #include "AudioApiUtils.h"
 
-HRESULT AudioApi::EnumerateDevices(std::vector<CComPtr<IMMDevice>>& devices) {
+HRESULT AudioApi::EnumerateDevices(std::vector<CComPtr<IMMDevice>>& devices, EDataFlow dataFlow) {
 
 	HRESULT hr = S_OK;
 
@@ -21,7 +21,7 @@ HRESULT AudioApi::EnumerateDevices(std::vector<CComPtr<IMMDevice>>& devices) {
 	EXIT_ON_ERROR(hr);
 
 	CComPtr<IMMDeviceCollection> deviceCollection;
-	hr = pEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &deviceCollection);
+	hr = pEnumerator->EnumAudioEndpoints(dataFlow, DEVICE_STATE_ACTIVE, &deviceCollection);
 	EXIT_ON_ERROR(hr);
 
 

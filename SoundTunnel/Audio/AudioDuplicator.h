@@ -18,6 +18,9 @@ public:
 	AudioDuplicator();
 	~AudioDuplicator();
 
+	// TODO ezt kitenni interface-re
+	HRESULT InitDefaultDevices();
+
 	
 	HRESULT SetSourceDevice(CComPtr<IMMDevice> device);
 	HRESULT SetSinkDevice(CComPtr<IMMDevice> device);
@@ -29,9 +32,8 @@ public:
 private:
 	std::thread backgroundThread;
 private:
-	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const std::vector<CString>& preferredDevices, _Out_ CComPtr<IMMDevice>& device);
+	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const CString& deviceNameSubstring, _Out_ CComPtr<IMMDevice>& device);
 	HRESULT Init();
-	HRESULT InitDefaultDevices();
 };
 
 
