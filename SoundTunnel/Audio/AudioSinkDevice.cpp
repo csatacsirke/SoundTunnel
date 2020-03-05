@@ -1,5 +1,8 @@
 #include "stdafx.h"
+
+
 #include "AudioSinkDevice.h"
+#include "AudioApi.h"
 
 
 AudioSinkDevice::AudioSinkDevice(CComPtr<IMMDevice> sinkDevice) : sinkDevice(sinkDevice) {

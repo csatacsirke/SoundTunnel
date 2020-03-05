@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "AudioApi.h"
+#include "AudioApiUtils.h"
 
 #include <Utils/Semaphore.h>
 
@@ -27,9 +27,9 @@ public:
 	void Stop();
 	void WaitForDestroy();
 private:
-	thread backgroundThread;
+	std::thread backgroundThread;
 private:
-	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const vector<CString>& preferredDevices, _Out_ CComPtr<IMMDevice>& device);
+	HRESULT SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const std::vector<CString>& preferredDevices, _Out_ CComPtr<IMMDevice>& device);
 	HRESULT Init();
 	HRESULT InitDefaultDevices();
 };

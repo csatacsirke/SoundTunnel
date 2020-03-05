@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AudioApi.h"
+#include "AudioApiUtils.h"
 
 
 // forrás másolva:
@@ -145,7 +145,7 @@ int __wmain(int argc, wchar_t* argv[]);
 
 
 class AudioFile {
-	vector<byte> data;
+	std::vector<byte> data;
 	WAVEFORMATEX waveFormat;
 
 public:
@@ -197,7 +197,7 @@ public:
 		return hr;
 	}
 
-	const vector<byte>& GetData() {
+	const std::vector<byte>& GetData() {
 		return data;
 	}
 
@@ -207,12 +207,12 @@ public:
 
 	//struct Iterator {
 
-	//	Iterator(const vector<byte>& buffer) {
+	//	Iterator(const std::vector<byte>& buffer) {
 
 	//	}
 	//}
 
-	//const vector<byte>& GetDataIterator() {
+	//const std::vector<byte>& GetDataIterator() {
 	//	return Iterator(data);
 	//}
 private:

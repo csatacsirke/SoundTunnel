@@ -93,7 +93,7 @@ BOOL CSoundTunnelApp::InitInstance()
 	//Test();
 
 
-	shared_ptr<AudioDuplicator> audioDuplicator = make_shared<AudioDuplicator>();
+	std::shared_ptr<AudioDuplicator> audioDuplicator = std::make_shared<AudioDuplicator>();
 	audioDuplicator->RunAsync();
 
 	CSoundTunnelDlg dlg(audioDuplicator);

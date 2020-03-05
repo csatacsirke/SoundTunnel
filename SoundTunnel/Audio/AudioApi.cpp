@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "AudioApi.h"
+#include "AudioApiUtils.h"
 
 HRESULT AudioApi::EnumerateDevices(std::vector<CComPtr<IMMDevice>>& devices) {
 

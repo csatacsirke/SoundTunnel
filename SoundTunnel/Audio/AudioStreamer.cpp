@@ -15,14 +15,14 @@ HRESULT AudioStreamer::PlayFile(CString fileName) {
 	EXIT_ON_ERROR(hr);
 
 
-	list<future<HRESULT>> threadResults;
+	std::list<std::future<HRESULT>> threadResults;
 	for (AudioSinkDevice& device : sinkDevices) {
 		//auto fnc = std::bind(&PlayFileOnDevice, this, audioFile, device);
-		future<HRESULT> result = std::async(&AudioStreamer::PlayFileOnDevice, this, audioFile, device);
+		std::future<HRESULT> result = std::async(&AudioStreamer::PlayFileOnDevice, this, audioFile, device);
 		threadResults.push_back(std::move(result));
 	}
 
-	for (future<HRESULT>& threadResult_packed : threadResults) {
+	for (std::future<HRESULT>& threadResult_packed : threadResults) {
 		threadResult_packed.wait();
 		HRESULT threadResult = threadResult_packed.get();
 		if (FAILED(threadResult)) {

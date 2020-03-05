@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AudioApi.h"
+#include "AudioApiUtils.h"
 #include "AudioFileHandler.h"
 #include "AudioSinkDevice.h"
 
@@ -17,7 +17,7 @@
 
 class AudioStreamer {
 	
-	list<AudioSinkDevice> sinkDevices;
+	std::list<AudioSinkDevice> sinkDevices;
 public:
 	AudioStreamer();
 

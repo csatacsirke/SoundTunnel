@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "AudioDuplicator.h"
+#include "AudioApi.h"
 
 // TODO lehetne hozzá gui-t írni
 
@@ -207,7 +208,7 @@ HRESULT AudioDuplicator::Run() {
 }
 
 HRESULT AudioDuplicator::RunAsync() {
-	backgroundThread = thread([this]{
+	backgroundThread = std::thread([this]{
 		if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL)) {
 			ASSERT(0);
 		}
@@ -239,7 +240,7 @@ void AudioDuplicator::WaitForDestroy() {
 }
 
 
-HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const vector<CString>& preferredDevices, CComPtr<IMMDevice>& resultDevice) {
+HRESULT AudioDuplicator::SelectDevice(CComPtr<IMMDeviceEnumerator> pEnumerator, const std::vector<CString>& preferredDevices, CComPtr<IMMDevice>& resultDevice) {
 	//CString preferredSecondaryDeviceName = L"SAMSUNG";
 
 	HRESULT hr = S_OK;
