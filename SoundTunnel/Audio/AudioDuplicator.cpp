@@ -18,7 +18,10 @@ static const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 using namespace AudioApi;
 
 
-AudioDuplicator::AudioDuplicator() {
+AudioDuplicator::AudioDuplicator(IMMDevice* sourceDevice, IMMDevice* sinkDevice) {
+
+	m_sourceDevice = sourceDevice;
+	m_sinkDevice = sinkDevice;
 
 	Init();
 
@@ -45,32 +48,34 @@ HRESULT AudioDuplicator::Init() {
 	return hr;
 }
 
-HRESULT AudioDuplicator::SetSourceDevice(CComPtr<IMMDevice> device) {
-	this->sourceDevice = device;
-	return S_OK;
-}
-
-HRESULT AudioDuplicator::SetSinkDevice(CComPtr<IMMDevice> device) {
-	this->sinkDevice = device;
-	return S_OK;
-}
+//HRESULT AudioDuplicator::SetSourceDevice(CComPtr<IMMDevice> device) {
+//	this->m_sourceDevice = device;
+//	return S_OK;
+//}
+//
+//HRESULT AudioDuplicator::SetSinkDevice(CComPtr<IMMDevice> device) {
+//	this->m_sinkDevice = device;
+//	return S_OK;
+//}
 
 
 
 HRESULT AudioDuplicator::Run() {
 
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	// Notify the audio sink which format to use.
 	//hr = pMySink->SetFormat(pwfx);
 	//EXIT_ON_ERROR(hr);
 
 
-
+	m_cancellationEvent.ResetEvent();
+	CEvent sourceAudioEvent{};
+	
 
 
 	CComPtr<IAudioClient> pSourceAudioClient;
-	hr = sourceDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&pSourceAudioClient);
+	hr = m_sourceDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&pSourceAudioClient);
 	EXIT_ON_ERROR(hr);
 
 
@@ -82,7 +87,11 @@ HRESULT AudioDuplicator::Run() {
 
 	// HSN: HUNDRED NANO SECONDS
 	REFERENCE_TIME hnsRequestedDuration = BUFFER_DURATION_HNS;
-	hr = pSourceAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK, hnsRequestedDuration, 0, pwfx, NULL);
+	hr = pSourceAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK | AUDCLNT_STREAMFLAGS_EVENTCALLBACK, hnsRequestedDuration, 0, pwfx, NULL);
+	EXIT_ON_ERROR(hr);
+
+
+	hr = pSourceAudioClient->SetEventHandle(sourceAudioEvent);
 	EXIT_ON_ERROR(hr);
 
 
@@ -101,7 +110,7 @@ HRESULT AudioDuplicator::Run() {
 
 
 	CComPtr<IAudioClient> pDestinationAudioClient;
-	hr = sinkDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&pDestinationAudioClient);
+	hr = m_sinkDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&pDestinationAudioClient);
 	EXIT_ON_ERROR(hr);
 
 	// TODO a négyes csodakonstanssal valamit kezdeni
@@ -132,69 +141,70 @@ HRESULT AudioDuplicator::Run() {
 	DWORD hnsActualDuration = DWORD(double(__REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
 
 	// Each loop fills about half of the shared buffer.
-	while (!stop) {
+	while (true) {
 		// Sleep for half the buffer duration.
-		Sleep(hnsActualDuration / __REFTIMES_PER_MILLISEC / 2);
+		//Sleep(hnsActualDuration / __REFTIMES_PER_MILLISEC / 2);
 
-		UINT32 packetLength = 0;
-		hr = pCaptureClient->GetNextPacketSize(&packetLength);
+		using Handles = HANDLE[];
+		const DWORD WAIT_OBJECT_CANCEL = WAIT_OBJECT_0;
+		const DWORD WAIT_OBJECT_SOURCE_AUDIO_EVENT = WAIT_OBJECT_0 + 1;
+
+		const DWORD wait_result = ::WaitForMultipleObjects(2, Handles{ m_cancellationEvent.m_hObject, sourceAudioEvent.m_hObject }, FALSE, INFINITE);
+		if (wait_result == WAIT_OBJECT_CANCEL) {
+			break;
+		}
+
+		if (wait_result != WAIT_OBJECT_SOURCE_AUDIO_EVENT) {
+			// ??? some kind of error
+			break;
+		}
+
+
+		// Get the available data in the shared buffer.
+		UINT32 numFramesAvailable;
+		DWORD flags;
+		BYTE* pCaptureData;
+
+		hr = pCaptureClient->GetBuffer(
+			&pCaptureData,
+			&numFramesAvailable,
+			&flags,
+			NULL,
+			NULL
+		);
 		EXIT_ON_ERROR(hr);
 
+		BOOL bufferIsSilent = (flags & AUDCLNT_BUFFERFLAGS_SILENT);
+		//if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
+		//	pCaptureData = NULL;  // Tell CopyData to write silence.
+		//}
 
+		if (!bufferIsSilent) {
 
-		while (packetLength != 0 && !stop) {
-
-			// Get the available data in the shared buffer.
-			UINT32 numFramesAvailable;
-			DWORD flags;
-			BYTE* pCaptureData;
 			BYTE* pRenderData;
-
-			hr = pCaptureClient->GetBuffer(
-				&pCaptureData,
-				&numFramesAvailable,
-				&flags,
-				NULL,
-				NULL
-			);
-			EXIT_ON_ERROR(hr);
-
-			BOOL bufferIsSilent = (flags & AUDCLNT_BUFFERFLAGS_SILENT);
-			//if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
-			//	pCaptureData = NULL;  // Tell CopyData to write silence.
-			//}
-
-			if (!bufferIsSilent) {
-
-
-
-				hr = pRenderClient->GetBuffer(numFramesAvailable, &pRenderData);
-				EXIT_ON_ERROR(hr);
-
-
-				memcpy(pRenderData, pCaptureData, numFramesAvailable * pwfx->nBlockAlign);
-				// Load the initial data into the shared buffer.
-				//hr = pMySource->LoadData(bufferFrameCount, pData, &flags);
-				//EXIT_ON_ERROR(hr);
-
-				DWORD renderFlags = 0;
-				hr = pRenderClient->ReleaseBuffer(numFramesAvailable, renderFlags);
-				EXIT_ON_ERROR(hr);
-				//pRenderClient->
-				// Copy the available capture data to the audio sink.
-				//hr = pMySink->CopyData(pData, numFramesAvailable, &bDone);
-				//EXIT_ON_ERROR(hr);
-
-			}
-
-
-			hr = pCaptureClient->ReleaseBuffer(numFramesAvailable);
+			hr = pRenderClient->GetBuffer(numFramesAvailable, &pRenderData);
 			EXIT_ON_ERROR(hr);
 
 
-			hr = pCaptureClient->GetNextPacketSize(&packetLength);
+			memcpy(pRenderData, pCaptureData, numFramesAvailable * pwfx->nBlockAlign);
+			// Load the initial data into the shared buffer.
+			//hr = pMySource->LoadData(bufferFrameCount, pData, &flags);
+			//EXIT_ON_ERROR(hr);
+
+			DWORD renderFlags = 0;
+			hr = pRenderClient->ReleaseBuffer(numFramesAvailable, renderFlags);
 			EXIT_ON_ERROR(hr);
+			//pRenderClient->
+			// Copy the available capture data to the audio sink.
+			//hr = pMySink->CopyData(pData, numFramesAvailable, &bDone);
+			//EXIT_ON_ERROR(hr);
+
 		}
+
+
+		hr = pCaptureClient->ReleaseBuffer(numFramesAvailable);
+		EXIT_ON_ERROR(hr);
+
 	}
 
 	hr = pSourceAudioClient->Stop();  // Stop recording.
@@ -208,42 +218,36 @@ HRESULT AudioDuplicator::Run() {
 	return S_OK;
 }
 
-HRESULT AudioDuplicator::RunAsync() {
-	backgroundThread = std::thread([this]{
-		if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL)) {
-			ASSERT(0);
-		}
-
-
-		bool retry = true;
-		while (retry) {
-			HRESULT hr = Run();
-			retry = FAILED(hr) && !stop;
-			if (retry) {
-				Sleep(1000);
-			}
-		}
-	});
-
-	return S_OK;
-}
+//HRESULT AudioDuplicator::RunAsync() {
+//	backgroundThread = std::thread([this]{
+//		if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL)) {
+//			ASSERT(0);
+//		}
+//
+//
+//		bool retry = true;
+//		while (retry) {
+//			HRESULT hr = Run();
+//			retry = FAILED(hr) && !stop;
+//			if (retry) {
+//				Sleep(1000);
+//			}
+//		}
+//	});
+//
+//	return S_OK;
+//}
 
 
 void AudioDuplicator::Stop() {
-	stop = true;
-}
-
-
-void AudioDuplicator::WaitForDestroy() {
-	if (backgroundThread.joinable()) {
-		backgroundThread.join();
-	}
+	//stop = true;
+	m_cancellationEvent.SetEvent();
 }
 
 
 HRESULT AudioDuplicator::InitDefaultDevices() {
 
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	CComPtr<IMMDeviceEnumerator> pEnumerator;
 	hr = CoCreateInstance(
@@ -263,7 +267,7 @@ HRESULT AudioDuplicator::InitDefaultDevices() {
 
 	CComHeapPtr<WCHAR> defaultDeviceId;
 	pDefaultDevice->GetId(&defaultDeviceId);
-	this->sourceDevice = pDefaultDevice;
+	this->m_sourceDevice = pDefaultDevice;
 
 	std::vector<CComPtr<IMMDevice>> devices;
 	AudioApi::EnumerateDevices(devices, EDataFlow::eRender);
@@ -275,14 +279,12 @@ HRESULT AudioDuplicator::InitDefaultDevices() {
 		EXIT_ON_ERROR(hr);
 
 		if (StrCmpW((LPWSTR)deviceId, (LPWSTR)defaultDeviceId) != 0) {
-			this->sinkDevice = device;
+			this->m_sinkDevice = device;
 			return S_OK;
 		}
 		
 	}
 
 
-
-
-	return -1;
+	return E_FAIL;
 }

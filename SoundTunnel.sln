@@ -1,26 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoundTunnel", "SoundTunnel\SoundTunnel.vcxproj", "{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundTunnelApp", "SoundTunnelApp\SoundTunnelApp.csproj", "{7FE1553A-05A9-4C1A-979E-7CEF46F76285}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Debug|x64.ActiveCfg = Debug|x64
 		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Debug|x64.Build.0 = Debug|x64
-		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Debug|x86.ActiveCfg = Debug|Win32
-		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Debug|x86.Build.0 = Debug|Win32
 		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Release|x64.ActiveCfg = Release|x64
 		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Release|x64.Build.0 = Release|x64
-		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Release|x86.ActiveCfg = Release|Win32
-		{0AE91ED7-A345-4F77-B196-8C42ED6E6F90}.Release|x86.Build.0 = Release|Win32
+		{7FE1553A-05A9-4C1A-979E-7CEF46F76285}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7FE1553A-05A9-4C1A-979E-7CEF46F76285}.Debug|x64.Build.0 = Debug|Any CPU
+		{7FE1553A-05A9-4C1A-979E-7CEF46F76285}.Release|x64.ActiveCfg = Release|Any CPU
+		{7FE1553A-05A9-4C1A-979E-7CEF46F76285}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

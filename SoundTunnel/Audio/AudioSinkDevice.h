@@ -8,14 +8,14 @@ class AudioSinkDevice {
 	//CComPtr<IMMDevice> device
 	CComPtr<IAudioClient> sinkAudioClient;
 	CComPtr<IAudioRenderClient> sinkAudioRenderClient;
-	CComPtr<IMMDevice> sinkDevice;
+	CComPtr<IMMDevice> m_sinkDevice;
 	CHandle eventHandle;
 	//WAVEFORMATEX waveFormat;
 	int blockAlign; // frame size in bytes
 
 	CString friendlyDeviceName;
 public:
-	AudioSinkDevice(CComPtr<IMMDevice> sinkDevice);
+	AudioSinkDevice(CComPtr<IMMDevice> m_sinkDevice);
 
 	~AudioSinkDevice();
 

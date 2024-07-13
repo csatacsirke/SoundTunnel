@@ -5,8 +5,8 @@
 #include "AudioApi.h"
 
 
-AudioSinkDevice::AudioSinkDevice(CComPtr<IMMDevice> sinkDevice) : sinkDevice(sinkDevice) {
-	AudioApi::GetFriendlyName(sinkDevice, friendlyDeviceName);
+AudioSinkDevice::AudioSinkDevice(CComPtr<IMMDevice> m_sinkDevice) : m_sinkDevice(m_sinkDevice) {
+	AudioApi::GetFriendlyName(m_sinkDevice, friendlyDeviceName);
 	NULL;
 }
 
@@ -19,7 +19,7 @@ HRESULT AudioSinkDevice::Create(const WAVEFORMATEX * pwfx) {
 	HRESULT hr = S_OK;
 
 	//CComPtr<IAudioClient> sinkAudioClient;
-	hr = sinkDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&sinkAudioClient);
+	hr = m_sinkDevice->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&sinkAudioClient);
 	EXIT_ON_ERROR(hr);
 
 

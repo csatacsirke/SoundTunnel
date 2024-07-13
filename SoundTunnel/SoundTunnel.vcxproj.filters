@@ -42,13 +42,7 @@
     <ClInclude Include="Audio\AudioSinkDevice.h">
       <Filter>Audio</Filter>
     </ClInclude>
-    <ClInclude Include="Interface\SoundTunnelDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\Semaphore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface\SoundTunnelApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Audio\AudioApiUtils.h">
@@ -71,12 +65,6 @@
     <ClCompile Include="Audio\AudioSinkDevice.cpp">
       <Filter>Audio</Filter>
     </ClCompile>
-    <ClCompile Include="Interface\SoundTunnelDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Interface\SoundTunnelApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\SoundTunnel.rc2">
@@ -87,10 +75,5 @@
     <Image Include="res\SoundTunnel.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Interface\SoundTunnel.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>
