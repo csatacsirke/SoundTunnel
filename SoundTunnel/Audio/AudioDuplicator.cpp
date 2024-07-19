@@ -28,16 +28,25 @@ AudioDuplicator::AudioDuplicator(IMMDevice* sourceDevice, IMMDevice* sinkDevice)
 }
 
 AudioDuplicator::~AudioDuplicator() {
-	Stop();
+	StopInternal();
+}
+
+bool AudioDuplicator::Run() {
+	RunInternal();
+	return false;
+}
+
+void AudioDuplicator::Stop() {
+	StopInternal();
 }
 
 HRESULT AudioDuplicator::Init() {
 
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	// Common init 
-	hr = CoInitialize(NULL);
-	EXIT_ON_ERROR(hr);
+	HRESULT hr_co_init = CoInitialize(NULL);
+	//EXIT_ON_ERROR(hr_co_init); // lehet hogy már be volt állítva másra?
 
 	
 
@@ -60,7 +69,7 @@ HRESULT AudioDuplicator::Init() {
 
 
 
-HRESULT AudioDuplicator::Run() {
+HRESULT AudioDuplicator::RunInternal() {
 
 	HRESULT hr = S_OK;
 
@@ -239,52 +248,52 @@ HRESULT AudioDuplicator::Run() {
 //}
 
 
-void AudioDuplicator::Stop() {
+void AudioDuplicator::StopInternal() {
 	//stop = true;
 	m_cancellationEvent.SetEvent();
 }
 
 
-HRESULT AudioDuplicator::InitDefaultDevices() {
-
-	HRESULT hr = S_OK;
-
-	CComPtr<IMMDeviceEnumerator> pEnumerator;
-	hr = CoCreateInstance(
-		CLSID_MMDeviceEnumerator, NULL,
-		CLSCTX_ALL, IID_IMMDeviceEnumerator,
-		(void**)&pEnumerator
-	);
-	EXIT_ON_ERROR(hr);
-
-
-	// render 'hook' init
-
-	CComPtr<IMMDevice> pDefaultDevice;
-	hr = pEnumerator->GetDefaultAudioEndpoint(
-		eRender, eConsole, &pDefaultDevice);
-	EXIT_ON_ERROR(hr);
-
-	CComHeapPtr<WCHAR> defaultDeviceId;
-	pDefaultDevice->GetId(&defaultDeviceId);
-	this->m_sourceDevice = pDefaultDevice;
-
-	std::vector<CComPtr<IMMDevice>> devices;
-	AudioApi::EnumerateDevices(devices, EDataFlow::eRender);
-	EXIT_ON_ERROR(hr);
-
-	for (auto& device : devices) {
-		CComHeapPtr<WCHAR> deviceId;
-		device->GetId(&deviceId);
-		EXIT_ON_ERROR(hr);
-
-		if (StrCmpW((LPWSTR)deviceId, (LPWSTR)defaultDeviceId) != 0) {
-			this->m_sinkDevice = device;
-			return S_OK;
-		}
-		
-	}
-
-
-	return E_FAIL;
-}
+//HRESULT AudioDuplicator::InitDefaultDevices() {
+//
+//	HRESULT hr = S_OK;
+//
+//	CComPtr<IMMDeviceEnumerator> pEnumerator;
+//	hr = CoCreateInstance(
+//		CLSID_MMDeviceEnumerator, NULL,
+//		CLSCTX_ALL, IID_IMMDeviceEnumerator,
+//		(void**)&pEnumerator
+//	);
+//	EXIT_ON_ERROR(hr);
+//
+//
+//	// render 'hook' init
+//
+//	CComPtr<IMMDevice> pDefaultDevice;
+//	hr = pEnumerator->GetDefaultAudioEndpoint(
+//		eRender, eConsole, &pDefaultDevice);
+//	EXIT_ON_ERROR(hr);
+//
+//	CComHeapPtr<WCHAR> defaultDeviceId;
+//	pDefaultDevice->GetId(&defaultDeviceId);
+//	this->m_sourceDevice = pDefaultDevice;
+//
+//	std::vector<CComPtr<IMMDevice>> devices;
+//	AudioApi::EnumerateDevices(devices, EDataFlow::eRender);
+//	EXIT_ON_ERROR(hr);
+//
+//	for (auto& device : devices) {
+//		CComHeapPtr<WCHAR> deviceId;
+//		device->GetId(&deviceId);
+//		EXIT_ON_ERROR(hr);
+//
+//		if (StrCmpW((LPWSTR)deviceId, (LPWSTR)defaultDeviceId) != 0) {
+//			this->m_sinkDevice = device;
+//			return S_OK;
+//		}
+//		
+//	}
+//
+//
+//	return E_FAIL;
+//}

@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "SoundTunnelApp": {
+      "commandName": "Project",
+      "hotReloadEnabled": false,
+      "nativeDebugging": true
+    }
+  }
+}

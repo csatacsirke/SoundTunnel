@@ -1,11 +1,11 @@
 #pragma once
 
-
+#include "IAudioDuplicator.h"
 #include "AudioApiUtils.h"
 
 
 
-class AudioDuplicator {
+class AudioDuplicator  : public IAudioDuplicator {
 	CComPtr<IMMDevice> m_sourceDevice;
 	CComPtr<IMMDevice> m_sinkDevice;
 
@@ -16,20 +16,24 @@ public:
 	AudioDuplicator(IMMDevice* sourceDevice, IMMDevice* sinkDevice);
 	~AudioDuplicator();
 
+
+	bool Run() override;
+	void Stop() override;
+
 	// TODO ezt kitenni interface-re
-	HRESULT InitDefaultDevices();
+	//HRESULT InitDefaultDevices();
 
 	
 	//HRESULT SetSourceDevice(CComPtr<IMMDevice> device);
 	//HRESULT SetSinkDevice(CComPtr<IMMDevice> device);
 
-	HRESULT Run();
 	//HRESULT RunAsync();
-	void Stop();
 private:
+	HRESULT RunInternal();
+	void StopInternal();
+
 	HRESULT Init();
 };
-
 
 
 

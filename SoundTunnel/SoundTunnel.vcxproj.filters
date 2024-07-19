@@ -48,6 +48,12 @@
     <ClInclude Include="Audio\AudioApiUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Audio\IAudioDuplicator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\Result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -64,6 +70,12 @@
     </ClCompile>
     <ClCompile Include="Audio\AudioSinkDevice.cpp">
       <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\nyeh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\IAudioDuplicator.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
