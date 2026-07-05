@@ -4,6 +4,7 @@
 // but are changed infrequently
 
 #pragma once
+#define NOMINMAX
 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers

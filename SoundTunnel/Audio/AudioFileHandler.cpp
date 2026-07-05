@@ -147,7 +147,7 @@ DWORD CalculateMaxAudioDataSize(IMFMediaType * pAudioType, DWORD cbHeader, DWORD
 	DWORD cbMaxSize = MAXDWORD - cbHeader;
 
 	// Maximum size altogether.
-	cbAudioClipSize = min(cbAudioClipSize, cbMaxSize);
+	cbAudioClipSize = std::min(cbAudioClipSize, cbMaxSize);
 
 	// Round to the audio block size, so that we do not write a partial audio frame.
 	cbAudioClipSize = (cbAudioClipSize / cbBlockSize) * cbBlockSize;

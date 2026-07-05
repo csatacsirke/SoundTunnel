@@ -13,6 +13,9 @@ class AudioDuplicator  : public IAudioDuplicator {
 	//std::atomic_bool stop = false;
 	CEvent m_cancellationEvent;
 public:
+	// seconds
+	double m_targetMaxLatency = 0.060;
+public:
 	AudioDuplicator(IMMDevice* sourceDevice, IMMDevice* sinkDevice);
 	~AudioDuplicator();
 

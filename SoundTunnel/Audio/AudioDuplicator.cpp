@@ -3,12 +3,12 @@
 #include "AudioDuplicator.h"
 #include "AudioApi.h"
 
+
+#pragma comment(lib, "avrt.lib")
 #include <avrt.h>
 
 #include <set>
-// TODO lehetne hozzá gui-t írni
-
-
+#include <cmath>
 
 static const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
 static const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
@@ -170,6 +170,10 @@ HRESULT AudioDuplicator::RunInternal() {
 	EXIT_ON_ERROR(hr);
 
 
+
+	
+	const int64_t targetMaxFramesInCaptureBuffer = static_cast<int64_t>(pwfx->nSamplesPerSec * 0.060);
+
 	// Calculate the actual duration of the allocated buffer.
 	//REFERENCE_TIME hnsActualDuration = REFERENCE_TIME(double(REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
 	//DWORD hnsActualDuration = DWORD(double(__REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
@@ -215,8 +219,10 @@ HRESULT AudioDuplicator::RunInternal() {
 
 		if (!bufferIsSilent) {
 
+			const UINT32 outputBufferSize = targetMaxFramesInCaptureBuffer;
+
 			BYTE* pRenderData = nullptr;
-			hr = pRenderClient->GetBuffer(numFramesAvailable, &pRenderData);
+			hr = pRenderClient->GetBuffer(outputBufferSize, &pRenderData);
 
 			if (hr != AUDCLNT_E_BUFFER_TOO_LARGE) {
 				EXIT_ON_ERROR(hr);
@@ -228,7 +234,37 @@ HRESULT AudioDuplicator::RunInternal() {
 			}
 
 
-			memcpy(pRenderData, pCaptureData, numFramesAvailable * pwfx->nBlockAlign);
+			if (numFramesAvailable < outputBufferSize) {
+				// audio latency is not yet too big
+				memcpy(pRenderData, pCaptureData, numFramesAvailable * pwfx->nBlockAlign);
+			}
+			else {
+				float* out = reinterpret_cast<float*>(pRenderData);
+				const float* in = reinterpret_cast<float*>(pCaptureData);
+
+				const WORD channelCount = pwfx->nChannels;
+
+				for (size_t outputFrameIndex = 0; outputFrameIndex < outputBufferSize; ++outputFrameIndex) {
+					for (UINT32 channelIndex = 0; channelIndex < channelCount; ++channelIndex) {
+
+						const UINT32 inputFrameIndexFloor = outputFrameIndex * numFramesAvailable / outputBufferSize;
+						const double inputFrameIndexTheoretical = double(outputFrameIndex) * double(numFramesAvailable) / double(outputBufferSize);
+
+						const UINT32 inputFrameIndex_1 = inputFrameIndexFloor;
+						const UINT32 inputFrameIndex_2 = std::min(inputFrameIndexFloor + 1, numFramesAvailable);
+
+						const float sample_1 = pCaptureData[inputFrameIndex_1];
+						const float sample_2 = pCaptureData[inputFrameIndex_2];
+
+						const double t = inputFrameIndexTheoretical - double(inputFrameIndexFloor);
+
+						const float output_sample = (float)std::lerp<double>(sample_1, sample_2, t);
+
+						pRenderData[outputFrameIndex * channelCount + channelIndex] = output_sample;
+					}
+				}
+			}
+			
 			// Load the initial data into the shared buffer.
 			//hr = pMySource->LoadData(bufferFrameCount, pData, &flags);
 			//EXIT_ON_ERROR(hr);
