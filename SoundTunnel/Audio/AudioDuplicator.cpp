@@ -95,8 +95,8 @@ HRESULT AudioDuplicator::RunInternal() {
 	EXIT_ON_ERROR(hr);
 
 	// HSN: HUNDRED NANO SECONDS
-	REFERENCE_TIME hnsRequestedDuration = BUFFER_DURATION_HNS;
-	hr = pSourceAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK | AUDCLNT_STREAMFLAGS_EVENTCALLBACK, hnsRequestedDuration, 0, pwfx, NULL);
+	REFERENCE_TIME hnsRequestedBufferDuration = BUFFER_DURATION_HNS;
+	hr = pSourceAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK | AUDCLNT_STREAMFLAGS_EVENTCALLBACK, hnsRequestedBufferDuration, 0, pwfx, NULL);
 	EXIT_ON_ERROR(hr);
 
 
@@ -124,7 +124,7 @@ HRESULT AudioDuplicator::RunInternal() {
 
 	// TODO a négyes csodakonstanssal valamit kezdeni
 	DWORD audclnt_streamflags = 0;
-	hr = pDestinationAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, audclnt_streamflags, hnsRequestedDuration * 4, 0, pwfx, NULL);
+	hr = pDestinationAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, audclnt_streamflags, hnsRequestedBufferDuration * 4, 0, pwfx, NULL);
 	//hr = pSecondaryAudioClient->Initialize(AUDCLNT_SHAREMODE_EXCLUSIVE, audclnt_streamflags, hnsRequestedDuration * 4, 0, pwfx, NULL);
 	EXIT_ON_ERROR(hr);
 
@@ -147,7 +147,7 @@ HRESULT AudioDuplicator::RunInternal() {
 
 	// Calculate the actual duration of the allocated buffer.
 	//REFERENCE_TIME hnsActualDuration = REFERENCE_TIME(double(REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
-	DWORD hnsActualDuration = DWORD(double(__REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
+	//DWORD hnsActualDuration = DWORD(double(__REFTIMES_PER_SEC) * bufferFrameCount / pwfx->nSamplesPerSec);
 
 	// Each loop fills about half of the shared buffer.
 	while (true) {
@@ -190,9 +190,17 @@ HRESULT AudioDuplicator::RunInternal() {
 
 		if (!bufferIsSilent) {
 
-			BYTE* pRenderData;
+			BYTE* pRenderData = nullptr;
 			hr = pRenderClient->GetBuffer(numFramesAvailable, &pRenderData);
-			EXIT_ON_ERROR(hr);
+
+			if (hr != AUDCLNT_E_BUFFER_TOO_LARGE) {
+				EXIT_ON_ERROR(hr);
+			}
+
+			if (!pRenderData) {
+				ASSERT(hr == AUDCLNT_E_BUFFER_TOO_LARGE);
+				continue;
+			}
 
 
 			memcpy(pRenderData, pCaptureData, numFramesAvailable * pwfx->nBlockAlign);
