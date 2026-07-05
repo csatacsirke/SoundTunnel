@@ -3,6 +3,8 @@
 #include "AudioDuplicator.h"
 #include "AudioApi.h"
 
+#include <avrt.h>
+
 #include <set>
 // TODO lehetne hozzá gui-t írni
 
@@ -67,9 +69,32 @@ HRESULT AudioDuplicator::Init() {
 //	return S_OK;
 //}
 
+namespace {
+
+	class ScopedThreadCharacteristics {
+		HANDLE mmcss = 0;
+	public:
+		ScopedThreadCharacteristics() {
+
+			DWORD taskIndex = 0;
+			mmcss = AvSetMmThreadCharacteristicsW(L"Pro Audio", &taskIndex);
+			ASSERT(mmcss);
+		}
+
+		~ScopedThreadCharacteristics() {
+			if (mmcss) {
+				AvRevertMmThreadCharacteristics(mmcss);
+			};
+		}
+	};
+}
 
 
 HRESULT AudioDuplicator::RunInternal() {
+
+	ScopedThreadCharacteristics _scopedThreadCharacteristics;
+
+
 
 	HRESULT hr = S_OK;
 
